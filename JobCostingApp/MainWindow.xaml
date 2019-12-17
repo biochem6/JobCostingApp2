@@ -1,0 +1,159 @@
+﻿<controls:MetroWindow x:Class="JobCostingApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        xmlns:controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        BorderThickness="2"       
+        GlowBrush="{DynamicResource AccentColorBrush}" 
+        Title="Progage Job Costing" Height="800" Width="810" FontFamily="Courier New" FontSize="14">
+
+
+    <Grid >
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="10"/>
+            <ColumnDefinition Width="158"/>
+            <ColumnDefinition Width="158"/>
+            <ColumnDefinition Width="158"/>
+            <ColumnDefinition Width="158"/>
+            <ColumnDefinition Width="158"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="10"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="10"/>
+        </Grid.RowDefinitions>
+
+
+        <Border Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="3" BorderBrush="{DynamicResource AccentColorBrush}" BorderThickness="2" Margin="1,15,1,20">
+            <StackPanel>
+                <TextBlock HorizontalAlignment="Center"  TextWrapping="Wrap" Text="Job Costing" VerticalAlignment="Top"  FontSize="28" FontWeight="DemiBold" TextAlignment="Center" Margin="0,5,0,0" />
+                <TextBlock HorizontalAlignment="Center"  TextWrapping="Wrap" Text="Progage Inc." VerticalAlignment="Top"  FontSize="12" FontWeight="DemiBold" TextAlignment="Center" />
+                <TextBlock HorizontalAlignment="Center"  TextWrapping="Wrap" Text="7555 Tyler Blvd # 6, Mentor, OH 44060" VerticalAlignment="Top"  FontSize="12" FontWeight="DemiBold" TextAlignment="Center" Margin="0,0,0,5"/>
+            </StackPanel>
+        </Border>
+
+
+        <Label Content="Employee:" Grid.Column="1" HorizontalAlignment="Left" Grid.Row="3" VerticalAlignment="Top" Width="76" Height="26" Margin="2,0,0,0"/>
+        <ComboBox Grid.Column="2" HorizontalAlignment="Left"  Grid.Row="3" VerticalAlignment="Top" Width="140"  Name="EmployeeComboBox" Text="{Binding Path=EmployeeNameText}" ItemsSource="{Binding Path=Employee}" DisplayMemberPath="EmployeeName" SelectedValuePath="EmployeeName" SelectedValue="EmployeeName"  Height="22" Margin="9,0,0,5" x:FieldModifier="public" PreviewKeyDown="container_PreviewKeyDown"  />
+
+        <TextBlock Grid.Column="2" HorizontalAlignment="Right" TextAlignment="Center"  Grid.Row="3" TextWrapping="Wrap" FontSize="9" Foreground="Red" VerticalAlignment="Top" Width="157" Margin="0,27,0,0"  Height="16" Text="{Binding EmployeeValidationText}" />
+
+        <Label Content="Date:" Grid.Column="1" HorizontalAlignment="Left" Grid.Row="4" VerticalAlignment="Top" Width="128" Height="26" Margin="2,0,0,0"/>
+        <Label Content="Format DD/MM/YY" Grid.Column="1" HorizontalAlignment="Left" Grid.Row="4"  VerticalAlignment="Top" Width="144" Height="26" Margin="2,19,0,0" FontSize="11"  FontStyle="Italic" Foreground="DarkCyan" />
+        <TextBox Grid.Column="2" HorizontalAlignment="Left" Grid.Row="4" TextWrapping="Wrap" VerticalAlignment="Top" Width="140" Height="22" x:Name="Date" Margin="9,0,0,25" Text="{Binding Path=LaborDateText}"  PreviewKeyDown="container_PreviewKeyDown" />
+
+        <TextBlock Grid.Column="2" HorizontalAlignment="Right" TextAlignment="Center"  Grid.Row="4" TextWrapping="Wrap" FontSize="9" Foreground="Red" VerticalAlignment="Top" Width="157" Margin="0,27,0,0"  Height="16" Text="{Binding DateValidationText}"/>
+
+
+        <Label Content="Total Time:" Grid.Column="3" Height="26"  Grid.Row="3"  VerticalAlignment="Top"  HorizontalAlignment="Left" Width="159" Grid.ColumnSpan="2" Margin="2,0,0,0" />
+        <TextBox Grid.Column="4" HorizontalAlignment="Left" Height="22"  Grid.Row="3" TextWrapping="Wrap" VerticalAlignment="Top" Width="140" x:Name="TotalTime" Margin="6,0,0,0" Text="{Binding Path=TotalTimeText}" PreviewKeyDown="container_PreviewKeyDown" />
+
+        <TextBlock Grid.Column="4" HorizontalAlignment="Right" TextAlignment="Center"  Grid.Row="3" TextWrapping="Wrap" FontSize="9" Foreground="Red" VerticalAlignment="Top" Width="157" Margin="0,27,1,0" Height="16" Text="{Binding TotalTimeValidationText}"/>
+
+        <Label Content="Running Total:" Grid.Column="3" HorizontalAlignment="Left"  Grid.Row="4" VerticalAlignment="Top" Width="159" Height="26"  Grid.ColumnSpan="2" Margin="2,0,0,0"/>
+        <Label Grid.Column="4" HorizontalAlignment="Left" Height="26" Grid.Row="4"  VerticalAlignment="Top" Width="140" Margin="6,0,0,0" Content="{Binding Path=RunningTotalText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  />
+
+        <Button Content="Refresh" BorderBrush="{DynamicResource AccentColorBrush}" BorderThickness="2" Grid.Column="5" Grid.Row="1" Width="60" Height="30" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,106,0,0" Grid.RowSpan="3" />
+
+        <Label Content="Job Number" Grid.Column="1" HorizontalAlignment="Left" Height="26"  Grid.Row="6" Width="120"  VerticalAlignment="Top" Margin="1,0,0,0" />
+        <TextBox Grid.Column="1" HorizontalAlignment="Left" Height="22"  Grid.Row="7" TextWrapping="Wrap" VerticalAlignment="Top" Width="140" Margin="6,0,0,0" Text="{Binding JobNumberText}" PreviewKeyDown="container_PreviewKeyDown"  x:Name="JobNumberTextBox"  />
+
+        <TextBlock HorizontalAlignment="Right" TextAlignment="Center"  Grid.Row="7" TextWrapping="Wrap" FontSize="9" Foreground="Red" VerticalAlignment="Top" Width="158" Margin="0,27,0,0" Height="17" Text="{Binding JobNumberValidationText}" Grid.Column="1" />
+
+        <Label Content="Detail Number/s" Grid.Column="2" HorizontalAlignment="Left" Height="26"  Grid.Row="6" Width="141"  VerticalAlignment="Top" Margin="3,0,0,0"  />
+        <TextBox Grid.Column="2" HorizontalAlignment="Left" Height="22"  Grid.Row="7"  VerticalAlignment="Top" Width="140" Margin="9,0,0,0"   Text="{Binding DetailNumberText, Mode=TwoWay}" PreviewKeyDown="container_PreviewKeyDown" />
+
+        <TextBlock Grid.Column="2" HorizontalAlignment="Right" TextAlignment="Center"  Grid.Row="7" TextWrapping="Wrap" FontSize="9" Foreground="Red" VerticalAlignment="Top" Width="158" Margin="0,27,0,0" Height="22" Text="{Binding DetailNumberValidationText, Mode=OneWay}" Grid.RowSpan="3"/>
+
+        <Label Content="Operation Code" Grid.Column="3" HorizontalAlignment="Left" Height="26"  Grid.Row="6" Width="131"  VerticalAlignment="Top" Margin="2,0,0,0" />
+        <ComboBox Grid.Column="3" HorizontalAlignment="Left" Height="22"  Grid.Row="7"  VerticalAlignment="Top" Width="140" Margin="6,0,0,0" Text="{Binding Path=OperationCodeComboBoxText, Mode=TwoWay}"  ItemsSource="{Binding Path=OperationCodeComboBoxList}" DisplayMemberPath="Code" SelectedValuePath="Code" SelectedValue="Code" PreviewKeyDown="container_PreviewKeyDown" />
+
+        <TextBlock Grid.Column="3" HorizontalAlignment="Right" TextAlignment="Center"  Grid.Row="7" TextWrapping="Wrap" FontSize="9" Foreground="Red" VerticalAlignment="Top" Width="158" Margin="0,27,0,0" Height="19" Text="{Binding OperationCodeValidationText}"/>
+        <Label Content="Run Time" Grid.Column="4" HorizontalAlignment="Left" Height="26"  Grid.Row="6" Width="90"  VerticalAlignment="Top" Margin="1,0,0,0"  />
+        <TextBox Grid.Column="4" HorizontalAlignment="Left" Height="22"  Grid.Row="7" TextWrapping="Wrap" VerticalAlignment="Top" Width="140" Margin="6,0,0,0"  Text="{Binding Path=RunTimeText, Mode=TwoWay}" PreviewKeyDown="container_PreviewKeyDown" />
+
+        <TextBlock Grid.Column="4" HorizontalAlignment="Right" TextAlignment="Center"  Grid.Row="7" TextWrapping="Wrap" FontSize="9" Foreground="Red" VerticalAlignment="Top" Width="157" Margin="0,27,0,0" Height="17" Text="{Binding RunTimeValidationText}"/>
+
+        <Button Content="Enter" Grid.Column="5" Margin="43,0,40,0" Grid.Row="7" VerticalAlignment="Top" Height="30"  FontSize="12" Background="CadetBlue" Command="{Binding ButtonCommand}" Click="Button_Click" />
+
+
+
+        <Grid Margin="0,10"  Grid.Column="1" Grid.Row="9"  Grid.ColumnSpan="5" Background="White">
+            <Grid.ColumnDefinitions>
+
+                <ColumnDefinition Width="158"/>
+                <ColumnDefinition Width="158"/>
+                <ColumnDefinition Width="158"/>
+                <ColumnDefinition Width="158"/>
+                <ColumnDefinition Width="158"/>
+
+            </Grid.ColumnDefinitions>
+            <Border Grid.ColumnSpan="5" Grid.RowSpan="5" BorderBrush="{DynamicResource AccentColorBrush}" BorderThickness="1" >
+                <ScrollViewer Grid.ColumnSpan="5" >
+                    <DataGrid Name="itemsTemplate"  ItemsSource="{Binding Path=JobDetails}"  Grid.ColumnSpan="5"   ColumnWidth="150" AlternatingRowBackground="Gainsboro" HorizontalScrollBarVisibility="Hidden" HorizontalGridLinesBrush="Black" CanUserAddRows="False" AutoGenerateColumns="False" >
+                        <DataGrid.ColumnHeaderStyle>
+                            <Style TargetType="{x:Type DataGridColumnHeader}">
+                                <Setter Property="HorizontalAlignment" Value="Center" />
+                                <Setter Property="Background" Value="White" />
+                                <Setter Property="FontWeight" Value="Bold" />
+                                <Setter Property="SeparatorBrush" Value="DarkBlue" />
+                                <Setter Property="SeparatorVisibility" Value="Visible" />
+                            </Style>
+                        </DataGrid.ColumnHeaderStyle>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Job Number" Binding="{Binding JobNumber}"  >
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="HorizontalAlignment" Value="Center" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Detail Number/s" Binding="{Binding DetailNumber}" >
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="HorizontalAlignment" Value="Center" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Operation Code"  Binding="{Binding OperationCode}" >
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="HorizontalAlignment" Value="Center" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Run Time" Binding="{Binding RunTime}"   >
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="HorizontalAlignment" Value="Center" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTemplateColumn>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button  Width="50" Background="PaleVioletRed" Command="{Binding Path=DataContext.DeleteButtonCommand, RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}}" CommandParameter="{Binding Path=ID}" >Delete</Button>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+
+
+    </Grid>
+</controls:MetroWindow>
