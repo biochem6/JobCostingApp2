@@ -23,6 +23,8 @@ namespace JobCostingApp
 
         public ICommand ButtonCommand { get; private set; }
         public ICommand DeleteButtonCommand { get; private set; }
+        public ICommand RefreshButtonCommand { get; private set; }
+        public ICommand SubmitButtonCommand { get; private set; }
 
         private TrulyObservableCollection<JobItem> _jobDetails { get; set; }
         public TrulyObservableCollection<JobItem> JobDetails
@@ -109,7 +111,6 @@ namespace JobCostingApp
                 OnPropertyChanged("RunningTotalText");
             }
         }
-
 
         /// <summary>
         /// Validation Properties
@@ -201,6 +202,63 @@ namespace JobCostingApp
                 OnPropertyChanged("IsFocused");
             }
         }
+
+
+        private JobItem _selectedItem { get; set; }
+        public JobItem SelectedItem
+        {
+            get => _selectedItem;
+            set
+            {
+                _selectedItem = value;
+                OnPropertyChanged("SelectedItem");
+            }
+        }
+
+        private string _runningTotalBorder { get; set; }
+        public string RunningTotalBorder
+        {
+            get => _runningTotalBorder;
+            set
+            {
+                _runningTotalBorder = value;
+                OnPropertyChanged("RunningTotalBorder");
+            }
+        }
+
+        private string _isEnabled { get; set; }
+        public string IsEnabled
+        {
+            get => _isEnabled;
+            set
+            {
+                _isEnabled = value;
+                OnPropertyChanged("IsEnabled");
+            }
+        }
+
+        private string _submitBackground { get; set; }
+        public string SubmitBackground
+        {
+            get => _submitBackground;
+            set
+            {
+                _submitBackground = value;
+                OnPropertyChanged("SubmitBackground");
+            }
+        }
+
+        private string _employeeInitials { get; set; }
+        public string EmployeeInitials
+        {
+            get => _employeeInitials;
+            set
+            {
+                _employeeInitials = value;
+                OnPropertyChanged("EmployeeInitials");
+            }
+        }
+
         /// <summary>
         /// Constructor 
         /// </summary>
@@ -210,10 +268,23 @@ namespace JobCostingApp
             {
                 DataAccess dataAccess = new DataAccess();
                 Employee = dataAccess.GetEmployees();
+    
                 ButtonCommand = new RelayCommand<object>(Enter_Btn_Handler);
                 DeleteButtonCommand = new RelayCommand<object>(Delete_Btn_Handler);
+                RefreshButtonCommand = new RelayCommand(Refresh_Btn_Handler);
+                SubmitButtonCommand = new RelayCommand(Submit_Btn_Handler);
+
                 JobDetails = new TrulyObservableCollection<JobItem>();
                 JobDetails.CollectionChanged += JobDetail_CollectionChanged;
+
+                IsEnabled = "false";
+                SubmitBackground = "Black";
+                RunningTotalBorder = "White";
+
+                Timer aTimer = new Timer();
+                aTimer.Elapsed += new ElapsedEventHandler(CheckIfSubmit);
+                aTimer.Interval = 500;
+                aTimer.Enabled = true;
 
                 OperationCodeComboBoxList = new List<OperationComboBox>
                 {
@@ -238,58 +309,8 @@ namespace JobCostingApp
             }
         }
 
-        private void OnTimedEvent(object source, ElapsedEventArgs e)
-        {
-            GetRunningTotal();
-        }
-
-        private void JobDetail_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            if (e.OldStartingIndex == -1)
-            {
-                return;
-            };
-
-            GetRunningTotal();
-
-            JobItem jobItem = new JobItem();
-
-            jobItem.JobNumber = JobDetails[e.NewStartingIndex].JobNumber;
-            jobItem.DetailNumber = JobDetails[e.NewStartingIndex].DetailNumber;
-            jobItem.OperationCode = JobDetails[e.NewStartingIndex].OperationCode;
-            jobItem.RunTime = JobDetails[e.NewStartingIndex].RunTime;
-
-            ItemsValidator itemValidator = new ItemsValidator();
-
-            FluentValidation.Results.ValidationResult itemResults = itemValidator.Validate(jobItem);
-
-            if (itemResults.Errors.Count > 0)
-            {
-                foreach (var i in itemResults.Errors)
-                {
-                    var propertyName = i.PropertyName;
-
-                    switch (propertyName)
-                    {
-                        case "JobNumber":
-                            JobDetails[e.NewStartingIndex].JobNumber = "Invalid Input";
-                            break;
-                        case "RunTime":
-                            JobDetails[e.NewStartingIndex].RunTime = "Invalid Input";
-                            break;
-                        case "OperationCode":
-                            JobDetails[e.NewStartingIndex].OperationCode = "Invalid Input";
-                            break;
-                        case "DetailNumber":
-                            JobDetails[e.NewStartingIndex].DetailNumber = "Invalid Input";
-                            break;
-                    }
-                }
-            }
-        }
-
         private void Enter_Btn_Handler(object obj)
-        {        
+        {
             if (_errors.Count > 0)
             {
                 //clear error messages
@@ -304,7 +325,7 @@ namespace JobCostingApp
             }
             JobItemHeader jobItemHeader = new JobItemHeader
             {
-                Employee = this.EmployeeNameText,
+                Employee = EmployeeInitials,
                 TotalTime = this.TotalTimeText,
                 DateTime = this.LaborDateText
             };
@@ -338,9 +359,75 @@ namespace JobCostingApp
                 JobNumberText = "";
                 DetailNumberText = "";
                 OperationCodeComboBoxText = "";
-                RunTimeText = "";
-                IsFocused = "True";
+                RunTimeText = "";             
             }
+        }
+
+        private void DisplayJobItems(List<int> details)
+        {
+            string runTimeCal = Math.Round((Convert.ToDouble(RunTimeText) / details.Count), 2, MidpointRounding.ToEven).ToString();
+
+            foreach (int i in details)
+            {
+                JobDetails.Add(new JobItem() { JobNumber = JobNumberText, DetailNumber = i.ToString(), OperationCode = OperationCodeComboBoxText, RunTime = runTimeCal });
+            }
+
+            JobDetails.ToList();
+            GetRunningTotal();
+            TimeComparison();
+        }
+
+        private void JobDetail_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.NewStartingIndex == -1)
+            {
+                return;
+            };
+
+            GetRunningTotal();            
+            JobItem jobItem = new JobItem();
+
+            jobItem.JobNumber = JobDetails[e.NewStartingIndex].JobNumber;
+            jobItem.DetailNumber = JobDetails[e.NewStartingIndex].DetailNumber;
+            jobItem.OperationCode = JobDetails[e.NewStartingIndex].OperationCode;
+            jobItem.RunTime = JobDetails[e.NewStartingIndex].RunTime;
+
+            ItemsValidator itemValidator = new ItemsValidator();
+
+            FluentValidation.Results.ValidationResult itemResults = itemValidator.Validate(jobItem);
+
+            if (itemResults.Errors.Count > 0)
+            {
+                foreach (var i in itemResults.Errors)
+                {
+                    var propertyName = i.PropertyName;
+
+                    switch (propertyName)
+                    {
+                        case "JobNumber":
+                            JobDetails[e.NewStartingIndex].JobNumber = "Invalid Input";
+                            _errors.Add("DataGrid JobNumber Error");
+                            break;
+                        case "RunTime":
+                            JobDetails[e.NewStartingIndex].RunTime = "Invalid Input";
+                            _errors.Add("DataGrid RunTime Error");
+                            break;
+                        case "OperationCode":
+                            JobDetails[e.NewStartingIndex].OperationCode = "Invalid Input";
+                            _errors.Add("DataGrid OperationCode Error");
+                            break;
+                        case "DetailNumber":
+                            JobDetails[e.NewStartingIndex].DetailNumber = "Invalid Input";
+                            _errors.Add("DataGrid J Error");
+                            break;
+                    }
+                }
+            }
+            else if (itemResults.Errors.Count == 0)
+            {
+                _errors.Clear();
+            }
+            TimeComparison();
         }
 
         private void GetErrors(FluentValidation.Results.ValidationResult results)
@@ -381,19 +468,6 @@ namespace JobCostingApp
                     DetailNumberValidationText = message;
                     break;
             }
-        }
-
-        private void DisplayJobItems(List<int> details)
-        {
-            string runTimeCal = Math.Round((Convert.ToDouble(RunTimeText) / details.Count), 2, MidpointRounding.ToEven).ToString();
-
-            foreach (int i in details)
-            {
-                JobDetails.Add(new JobItem() { JobNumber = JobNumberText, DetailNumber = i.ToString(), OperationCode = OperationCodeComboBoxText, RunTime = runTimeCal });
-            }
-
-            JobDetails.ToList();
-            GetRunningTotal();
         }
 
         //will parse the detail number input as there can be multiple detail numbers per job no
@@ -461,12 +535,76 @@ namespace JobCostingApp
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
-        private void Delete_Btn_Handler(object obj)
+        private void Delete_Btn_Handler(object sender)
         {
-            var a = obj;
-            
+           JobDetails.Remove(JobDetails.Where(i => i.JobNumber == SelectedItem.JobNumber && i.DetailNumber == SelectedItem.DetailNumber && i.OperationCode == SelectedItem.OperationCode && i.RunTime == SelectedItem.RunTime).FirstOrDefault());
+           GetRunningTotal();
+           TimeComparison();
         }
-       
+
+        private void Refresh_Btn_Handler()
+        {
+            TimeComparison();
+        }
+
+        private void TimeComparison()
+        {
+            if (TotalTimeText != null && RunningTotalText != null && RunningTotalText != "0")
+            {
+                if (Convert.ToDouble(TotalTimeText) >= Convert.ToDouble(RunningTotalText) && _errors.Count == 0)
+                {
+                    RunningTotalBorder = "Green";
+                    _errors.Clear();
+                }
+                else if (Convert.ToDouble(TotalTimeText) >= Convert.ToDouble(RunningTotalText) && _errors.Count > 0)
+                {
+                    RunningTotalBorder = "Green";
+                }
+                else if (Convert.ToDouble(TotalTimeText) < Convert.ToDouble(RunningTotalText))
+                {
+                    RunningTotalBorder = "Red";
+                    _errors.Add("Running Total Error");
+                }
+                else
+                {
+                    RunningTotalBorder = "Red";
+                    _errors.Add("Running Total Error");
+                }
+            }
+            else if (TotalTimeText != null && RunningTotalText == "0")
+            {
+                RunningTotalBorder = "White";                
+            }
+        }
+
+        private void CheckIfSubmit(object sender, ElapsedEventArgs e)
+        {
+            double timeDiff = Convert.ToDouble(TotalTimeText) - Convert.ToDouble(RunningTotalText);
+            if (_errors.Count == 0 && JobDetails.Count > 0 && timeDiff >= 0 && timeDiff <= 0.25)
+            {
+                IsEnabled = "True";
+                SubmitBackground = "Green";
+            }
+            else
+            {
+                IsEnabled = "False";
+                SubmitBackground = "Black";
+            }
+        }
+
+        private void Submit_Btn_Handler()
+        {
+            JobItemHeader header = new JobItemHeader
+            {
+                Employee = EmployeeInitials,
+                TotalTime = TotalTimeText,
+                DateTime = LaborDateText
+            };
+
+            DataAccess dataAccess = new DataAccess();
+            dataAccess.Submit(header, JobDetails);
+
+        }
     }
 
     public class OperationComboBox

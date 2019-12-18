@@ -211,18 +211,18 @@ namespace JobCostingApp
         //        totalTime = Convert.ToDouble(TotalTime.Text.Trim());
         //        //CheckTime();
         //    }
-        //}
+        ////}
 
 
         //private void Delete_Btn_Click(object sender, RoutedEventArgs e)
         //{
-        //    var selectedItem = (JobItemValidation)icTodoList.SelectedItem;
+        //    var selectedItem = (JobItemValidation)ItemsTemplate.SelectedItem;
         //    if (selectedItem != null)
         //    {
         //        jobDetails.Remove(selectedItem);
         //        icTodoList.ItemsSource = jobDetails;
         //    }
-        //    GetRunningTotal();
+        //   //getRunningTotal();
         //}
 
 

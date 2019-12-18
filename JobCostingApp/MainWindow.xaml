@@ -46,7 +46,7 @@
 
 
         <Label Content="Employee:" Grid.Column="1" HorizontalAlignment="Left" Grid.Row="3" VerticalAlignment="Top" Width="76" Height="26" Margin="2,0,0,0"/>
-        <ComboBox Grid.Column="2" HorizontalAlignment="Left"  Grid.Row="3" VerticalAlignment="Top" Width="140"  Name="EmployeeComboBox" Text="{Binding Path=EmployeeNameText}" ItemsSource="{Binding Path=Employee}" DisplayMemberPath="EmployeeName" SelectedValuePath="EmployeeName" SelectedValue="EmployeeName"  Height="22" Margin="9,0,0,5" x:FieldModifier="public" PreviewKeyDown="container_PreviewKeyDown"  />
+        <ComboBox Grid.Column="2" HorizontalAlignment="Left"  Grid.Row="3" VerticalAlignment="Top" Width="140"  Name="EmployeeComboBox" Text="{Binding Path=EmployeeNameText}" ItemsSource="{Binding Path=Employee}" DisplayMemberPath="EmployeeName" SelectedValuePath="EmployeeInitials" SelectedValue="{Binding EmployeeInitials}"  Height="22" Margin="9,0,0,5" x:FieldModifier="public" PreviewKeyDown="container_PreviewKeyDown"  />
 
         <TextBlock Grid.Column="2" HorizontalAlignment="Right" TextAlignment="Center"  Grid.Row="3" TextWrapping="Wrap" FontSize="9" Foreground="Red" VerticalAlignment="Top" Width="157" Margin="0,27,0,0"  Height="16" Text="{Binding EmployeeValidationText}" />
 
@@ -63,9 +63,9 @@
         <TextBlock Grid.Column="4" HorizontalAlignment="Right" TextAlignment="Center"  Grid.Row="3" TextWrapping="Wrap" FontSize="9" Foreground="Red" VerticalAlignment="Top" Width="157" Margin="0,27,1,0" Height="16" Text="{Binding TotalTimeValidationText}"/>
 
         <Label Content="Running Total:" Grid.Column="3" HorizontalAlignment="Left"  Grid.Row="4" VerticalAlignment="Top" Width="159" Height="26"  Grid.ColumnSpan="2" Margin="2,0,0,0"/>
-        <Label Grid.Column="4" HorizontalAlignment="Left" Height="26" Grid.Row="4"  VerticalAlignment="Top" Width="140" Margin="6,0,0,0" Content="{Binding Path=RunningTotalText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  />
+        <Label Grid.Column="4" HorizontalAlignment="Left" Height="26" Grid.Row="4"  VerticalAlignment="Top" Width="140" Margin="6,0,0,0" BorderThickness="2" BorderBrush="{Binding RunningTotalBorder, Mode=TwoWay}" Content="{Binding Path=RunningTotalText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  />
 
-        <Button Content="Refresh" BorderBrush="{DynamicResource AccentColorBrush}" BorderThickness="2" Grid.Column="5" Grid.Row="1" Width="60" Height="30" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,106,0,0" Grid.RowSpan="3" />
+        <Button Content="Refresh" BorderBrush="{DynamicResource AccentColorBrush}" Command="{Binding RefreshButtonCommand}" BorderThickness="2" Grid.Column="5" Grid.Row="1" Width="60" Height="30" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,106,0,0" Grid.RowSpan="3" />
 
         <Label Content="Job Number" Grid.Column="1" HorizontalAlignment="Left" Height="26"  Grid.Row="6" Width="120"  VerticalAlignment="Top" Margin="1,0,0,0" />
         <TextBox Grid.Column="1" HorizontalAlignment="Left" Height="22"  Grid.Row="7" TextWrapping="Wrap" VerticalAlignment="Top" Width="140" Margin="6,0,0,0" Text="{Binding JobNumberText}" PreviewKeyDown="container_PreviewKeyDown"  x:Name="JobNumberTextBox"  />
@@ -102,7 +102,7 @@
             </Grid.ColumnDefinitions>
             <Border Grid.ColumnSpan="5" Grid.RowSpan="5" BorderBrush="{DynamicResource AccentColorBrush}" BorderThickness="1" >
                 <ScrollViewer Grid.ColumnSpan="5" >
-                    <DataGrid Name="itemsTemplate"  ItemsSource="{Binding Path=JobDetails}"  Grid.ColumnSpan="5"   ColumnWidth="150" AlternatingRowBackground="Gainsboro" HorizontalScrollBarVisibility="Hidden" HorizontalGridLinesBrush="Black" CanUserAddRows="False" AutoGenerateColumns="False" >
+                    <DataGrid Name="itemsTemplate"  ItemsSource="{Binding Path=JobDetails}"  Grid.ColumnSpan="5"   ColumnWidth="150" AlternatingRowBackground="Gainsboro" HorizontalScrollBarVisibility="Hidden" HorizontalGridLinesBrush="Black" CanUserAddRows="False" AutoGenerateColumns="False"  SelectedItem="{Binding SelectedItem, Mode=TwoWay}">
                         <DataGrid.ColumnHeaderStyle>
                             <Style TargetType="{x:Type DataGridColumnHeader}">
                                 <Setter Property="HorizontalAlignment" Value="Center" />
@@ -144,7 +144,7 @@
                             <DataGridTemplateColumn>
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Button  Width="50" Background="PaleVioletRed" Command="{Binding Path=DataContext.DeleteButtonCommand, RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}}" CommandParameter="{Binding Path=ID}" >Delete</Button>
+                                        <Button  Width="50" Background="PaleVioletRed" Command="{Binding Path=DataContext.DeleteButtonCommand, RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}}" CommandParameter="{Binding SelectedItem}" >Delete</Button>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
@@ -153,6 +153,7 @@
                 </ScrollViewer>
             </Border>
         </Grid>
+        <Button Content="Submit" Grid.Column="5" HorizontalAlignment="Left" Margin="43,28,0,0" Grid.Row="1" VerticalAlignment="Top" IsEnabled="{Binding IsEnabled}" Background="{Binding SubmitBackground}" Command="{Binding SubmitButtonCommand}" Width="75"/>
 
 
     </Grid>
