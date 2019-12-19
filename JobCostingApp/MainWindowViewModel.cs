@@ -537,7 +537,7 @@ namespace JobCostingApp
 
         private void Delete_Btn_Handler(object sender)
         {
-           JobDetails.Remove(JobDetails.Where(i => i.JobNumber == SelectedItem.JobNumber && i.DetailNumber == SelectedItem.DetailNumber && i.OperationCode == SelectedItem.OperationCode && i.RunTime == SelectedItem.RunTime).FirstOrDefault());
+           JobDetails.Remove(JobDetails.FirstOrDefault(i => i.JobNumber == SelectedItem.JobNumber && i.DetailNumber == SelectedItem.DetailNumber && i.OperationCode == SelectedItem.OperationCode && i.RunTime == SelectedItem.RunTime));
            GetRunningTotal();
            TimeComparison();
         }

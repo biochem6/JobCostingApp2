@@ -1,30 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.OleDb;
+using System.Data.SQLite;
 using System.IO;
-using System.Text;
 
 namespace JobCostingApp
 {
     public class DataAccess
     {
-        private readonly string connectionString = @"Provider=Microsoft.Jet.OLEDB.4.0; Data Source=B:\; Extended Properties=dBASE IV; User ID=Admin;Password=;";
-        private readonly string csvPath = @"‪C:\Users\Andrew\Documents\TESTJOBCOSTING.csv";
+        private readonly string connectionString = @"Data Source=C:\Users\aashl\EMPSCHED.db;Version=3;";
+        public string csvPath = "C:\\Users\\aashl\\source\\repos\\biochem6\\JobCostingApp2\\TestOutput.csv";
 
         public List<EmployeeViewModel> GetEmployees()
         {
             // Dictionary<string, double> employeeDict = new Dictionary<string, double>();
-            using (OleDbConnection connection = new OleDbConnection(connectionString))
+            using (SQLiteConnection conn = new SQLiteConnection(connectionString))
             {
                 List<EmployeeViewModel> employee = new List<EmployeeViewModel>();
                 // The insertSQL string contains a SQL statement that
                 // inserts a new row in the source table.
-                 OleDbCommand command = new OleDbCommand("SELECT FIRSTNAME, LASTNAME, INITIAL, BURDEN, RATE FROM EMPSCHED.DBF", connection);
+                SQLiteCommand command = new SQLiteCommand("SELECT FIRSTNAME, LASTNAME, INITIAL, BURDEN, RATE FROM EMPSCHED", conn);
                 // Open the connection and execute the insert command.
                 try
                 {
-                    connection.Open();
-                    OleDbDataReader reader = command.ExecuteReader();
+                    conn.Open();
+                    SQLiteDataReader reader = command.ExecuteReader();
 
 
                     while (reader.Read())
@@ -48,26 +47,26 @@ namespace JobCostingApp
         }
         public void Submit(JobItemHeader header, TrulyObservableCollection<JobItem> jobDetails)
         {
-            using (OleDbConnection connection = new OleDbConnection(connectionString))
-            {               
-                double rate = 0;
-                double burden = 0;
-                
+            using (SQLiteConnection conn = new SQLiteConnection(connectionString))
+            {
+                string rate = null;
+                string burden = null;
+
                 try
                 {
-                    connection.Open();
+                    conn.Open();
                     var param = "INITIAL";
 
-                    OleDbCommand command1 = new OleDbCommand($"SELECT * FROM EMPSCHED.DBF WHERE '{param}'='{header.Employee}'", connection);
-                    OleDbDataReader reader = command1.ExecuteReader();
+                    SQLiteCommand command1 = new SQLiteCommand($"SELECT RATE, BURDEN FROM EMPSCHED WHERE `{param}`='{header.Employee}'", conn);
+                    SQLiteDataReader rdr = command1.ExecuteReader();
 
-
-                    while (reader.Read())
+                    while (rdr.Read())
                     {
-                        rate = Convert.ToDouble(reader[0]);
-                        burden = Convert.ToDouble(reader[1]);
+                        rate = $@"{rdr[0]}";
+                        burden = $@"{rdr[1]}";
                     }
-                    reader.Close();
+
+
 
                 }
                 catch (Exception ex)
@@ -78,17 +77,26 @@ namespace JobCostingApp
                 try
                 {
                     //before your loop
-                    var csv = new StringBuilder();
-
-                    foreach (var jD in jobDetails)
+                    var sb = new List<string>();
+                    using (var writer = new StreamWriter(csvPath))
                     {
-                        var cost = Convert.ToDouble(header.DateTime) * rate;
-                        var totalBurden = Convert.ToDouble(header.TotalTime) * burden;
-                        var newLine = $"{jD.JobNumber}, {jD.DetailNumber}, {jD.OperationCode}, {header.TotalTime}, {header.DateTime}, {cost}, {totalBurden}, 1, FALSE";
-                        csv.AppendLine(newLine);
+                        foreach (var jD in jobDetails)
+                        {
+                            double cost = Convert.ToDouble(header.TotalTime) * Convert.ToDouble(rate);
+                            double totalBurden = Convert.ToDouble(header.TotalTime) * Convert.ToDouble(burden);
+                            string newLine = $"{jD.JobNumber},{jD.DetailNumber},{jD.OperationCode},{header.TotalTime},{header.DateTime},{cost},{totalBurden},1,FALSE";
+                            //using (var csv = new CsvWriter(writer))
+                            //{
+                            //    csv.WriteRecords(newLine);
+                            //}
+
+                            sb.Add(newLine);
+                        }
                     }
+
+
                     //after your loop
-                    File.AppendAllText(csvPath, csv.ToString());
+                    File.WriteAllLines(csvPath, sb);
 
                 }
                 catch (Exception ex)
